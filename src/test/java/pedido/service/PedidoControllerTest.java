@@ -1,8 +1,5 @@
 package pedido.service;
 
-import pedido.model.Pedido;
-import pedido.dto.PedidoRequest;
-import pedido.service.PedidoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,9 +11,19 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import pedido.controller.PedidoController;
+import pedido.dto.PedidoRequest;
+import pedido.model.Pedido;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PedidoController.class)
@@ -55,7 +62,7 @@ public class PedidoControllerTest {
         pedido.setCodigoCliente(1);
         pedido.setValorTotal(BigDecimal.valueOf(900)); // 10% de desconto
 
-        when(pedidoService.criarPedido(any(PedidoRequest.class))).thenReturn(pedido);
+        when(pedidoService.criarPedido((PedidoRequest) any(PedidoRequest.class))).thenReturn(pedido);
 
         mockMvc.perform(post("/api/pedidos")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -74,7 +81,7 @@ public class PedidoControllerTest {
         request.setQuantidade(10);
         request.setCodigoCliente(1);
 
-        when(pedidoService.criarPedido(any(PedidoRequest.class))).thenReturn(new Pedido());
+        when(pedidoService.criarPedido((PedidoRequest) any(PedidoRequest.class))).thenReturn(new Pedido());
 
         mockMvc.perform(post("/api/pedidos/importar-json")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +94,7 @@ public class PedidoControllerTest {
     public void testImportarPedidosXml() throws Exception {
         String xml = "<pedido><numeroControle>12345</numeroControle><nome>Produto Teste</nome><valorUnitario>100</valorUnitario><quantidade>10</quantidade><codigoCliente>1</codigoCliente></pedido>";
 
-        when(pedidoService.criarPedido(any(PedidoRequest.class))).thenReturn(new Pedido());
+        when(pedidoService.criarPedido((PedidoRequest) any(PedidoRequest.class))).thenReturn(new Pedido());
 
         mockMvc.perform(post("/api/pedidos/importar-xml")
                         .contentType(MediaType.APPLICATION_XML)

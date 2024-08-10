@@ -14,6 +14,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.annotation.PostConstruct;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;

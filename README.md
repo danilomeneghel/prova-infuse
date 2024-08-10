@@ -44,7 +44,7 @@ Aguarde carregar todo o serviço web. <br>
 Após concluído, digite o endereço abaixo em seu navegador, nele será listado os produtos 
 cadastrados na API. <br>
 
-http://localhost:8080/pedidos
+http://localhost:8080/api/pedidos
 
 ## Testes
 

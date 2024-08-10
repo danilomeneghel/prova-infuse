@@ -1,15 +1,19 @@
 package pedido.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @XmlRootElement(name = "pedido")
 public class PedidoRequest {
 
@@ -35,4 +39,5 @@ public class PedidoRequest {
     @NotNull
     @XmlElement(name = "codigoCliente")
     private Integer codigoCliente;
+
 }
