@@ -11,9 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import pedido.controller.PedidoController;
 import pedido.dto.PedidoRequest;
 import pedido.model.Pedido;
+import pedido.service.PedidoService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,9 +31,6 @@ public class PedidoControllerTest {
 
     @Mock
     private PedidoService pedidoService;
-
-    @InjectMocks
-    private PedidoController pedidoController;
 
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
