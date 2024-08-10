@@ -32,13 +32,16 @@ public class PedidoControllerTest {
     @Mock
     private PedidoService pedidoService;
 
+    @InjectMocks
+    private PedidoController pedidoController;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setUp(WebApplicationContext wac) {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(pedidoController).build();
         this.objectMapper = new ObjectMapper();
     }
 
@@ -139,3 +142,4 @@ public class PedidoControllerTest {
                 .andExpect(jsonPath("$[0].valorTotal", is(100)));
     }
 }
+
