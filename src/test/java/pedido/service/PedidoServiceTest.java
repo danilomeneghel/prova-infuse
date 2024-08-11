@@ -1,5 +1,6 @@
 package pedido.service;
 
+import pedido.ApplicationTests;
 import pedido.model.Pedido;
 import pedido.dto.PedidoRequest;
 import pedido.repository.PedidoRepository;
@@ -19,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-public class PedidoServiceTest {
+public class PedidoServiceTest extends ApplicationTests {
 
     @Mock
     private PedidoRepository pedidoRepository;
