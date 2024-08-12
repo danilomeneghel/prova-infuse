@@ -1,5 +1,10 @@
 package pedido.controller;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import org.modelmapper.ModelMapper;
+import org.springframework.web.multipart.MultipartFile;
 import pedido.model.Pedido;
 import pedido.dto.PedidoRequest;
 import pedido.model.Pedidos;
@@ -9,41 +14,31 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.annotation.PostConstruct;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
 
-    @Value("${pedido.importar.json.path}")
-    private String jsonFilePath;
-
-    @Value("${pedido.importar.xml.path}")
-    private String xmlFilePath;
-
     private final PedidoService pedidoService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private ModelMapper modelMapper = new ModelMapper();
+    
     public PedidoController(PedidoService pedidoService) {
         this.pedidoService = pedidoService;
-    }
-
-    @PostConstruct
-    public void init() {
-        // Processar os arquivos de pedidos na inicialização da aplicação
-        importarPedidosJson();
-        importarPedidosXml();
     }
 
     @PostMapping(consumes = {"application/json", "application/xml"}, produces = "application/json")
@@ -56,96 +51,81 @@ public class PedidoController {
         }
     }
 
-    @PostMapping(path = "/importar-json", consumes = "application/json")
-    public ResponseEntity<String> importarPedidosJson(@RequestBody List<PedidoRequest> pedidosRequest) {
+    public ResponseEntity<String> importarPedidos(List<PedidoRequest> pedidosRequest) {
         if (pedidosRequest.size() > 10) {
             return new ResponseEntity<>("Número máximo de pedidos é 10", HttpStatus.BAD_REQUEST);
         }
 
-        for (PedidoRequest request : pedidosRequest) {
+        for (PedidoRequest pedidoRequest : pedidosRequest) {
             try {
-                pedidoService.criarPedido(request);
+                List<Pedido> pedidos = pedidoService.consultarPedidos(pedidoRequest.getNumeroControle(), null);
+                if (pedidos.isEmpty()) {
+                    pedidoService.criarPedido(pedidoRequest);
+                }
             } catch (RuntimeException e) {
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
         }
-        return new ResponseEntity<>("Pedidos importados com sucesso", HttpStatus.OK);
+        return new ResponseEntity<>("Pedido(s) importado(s) com sucesso", HttpStatus.OK);
     }
 
-    private void importarPedidosJson() {
-        Path path = Paths.get(jsonFilePath);
-        if (Files.exists(path)) {
-            try {
-                List<PedidoRequest> pedidosRequest = objectMapper.readValue(Files.readString(path),
-                        objectMapper.getTypeFactory().constructCollectionType(List.class, PedidoRequest.class));
+    @PostMapping(path = "/importar-json", consumes = "application/json", produces = "application/json")
+    public void importarPedidosJson(@RequestBody List<PedidoRequest> pedidosRequest) {
+        importarPedidos(pedidosRequest);
+    }
 
-                if (pedidosRequest.size() > 10) {
-                    System.out.println("Número máximo de pedidos é 10");
-                    return;
-                }
+    @PostMapping("/importar-arquivo-json")
+    public ResponseEntity<String> importarPedidosArquivoJson(@RequestParam("arquivos") MultipartFile[] arquivos) {
+        for (MultipartFile arquivo : arquivos) {
+            if (!arquivo.isEmpty()) {
+                try {
+                    String jsonContent = new String(arquivo.getBytes(), StandardCharsets.UTF_8);
 
-                for (PedidoRequest request : pedidosRequest) {
-                    try {
-                        pedidoService.criarPedido(request);
-                    } catch (RuntimeException e) {
-                        System.out.println(e.getMessage());
-                    }
+                    List<Map<String, Object>> pedidosMapList = objectMapper.readValue(
+                            jsonContent,
+                            new TypeReference<List<Map<String, Object>>>() {}
+                    );
+
+                    List<PedidoRequest> pedidosRequest = pedidosMapList.stream()
+                            .map(map -> modelMapper.map(map, PedidoRequest.class))
+                            .collect(Collectors.toList());
+
+                    importarPedidos(pedidosRequest);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Erro ao ler o arquivo JSON: " + e.getMessage());
                 }
-            } catch (IOException e) {
-                System.out.println("Erro ao ler o arquivo JSON: " + e.getMessage());
+            } else {
+                return ResponseEntity.badRequest().body("Arquivo vazio: " + arquivo.getOriginalFilename());
             }
-        } else {
-            System.out.println("Arquivo JSON não encontrado em: " + jsonFilePath);
         }
+        return ResponseEntity.ok("Todos os arquivos foram processados com sucesso");
     }
 
     @PostMapping(path = "/importar-xml", consumes = "application/xml", produces = "application/json")
-    public ResponseEntity<String> importarPedidosXml(@RequestBody String xml) {
-        try {
-            List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xml);
-
-            if (pedidosRequest.size() > 10) {
-                return new ResponseEntity<>("Número máximo de pedidos é 10", HttpStatus.BAD_REQUEST);
-            }
-
-            for (PedidoRequest request : pedidosRequest) {
-                try {
-                    pedidoService.criarPedido(request);
-                } catch (RuntimeException e) {
-                    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-                }
-            }
-            return new ResponseEntity<>("Pedidos importados com sucesso", HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>("Erro ao processar XML", HttpStatus.BAD_REQUEST);
-        }
+    public void importarPedidosXml(@RequestBody String xml) {
+        List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xml);
+        importarPedidos(pedidosRequest);
     }
 
-    private void importarPedidosXml() {
-        Path path = Paths.get(xmlFilePath);
-        if (Files.exists(path)) {
-            try {
-                String xml = Files.readString(path);
-                List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xml);
+    @PostMapping("/importar-arquivo-xml")
+    public ResponseEntity<String> importarPedidosArquivoXml(@RequestParam("arquivos") MultipartFile[] arquivos) {
+        for (MultipartFile arquivo : arquivos) {
+            if (!arquivo.isEmpty()) {
+                try {
+                    String xml = new String(arquivo.getBytes(), StandardCharsets.UTF_8);
+                    List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xml);
 
-                if (pedidosRequest.size() > 10) {
-                    System.out.println("Número máximo de pedidos é 10");
-                    return;
+                    importarPedidos(pedidosRequest);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Erro ao ler o arquivo XML: " + e.getMessage());
                 }
-
-                for (PedidoRequest request : pedidosRequest) {
-                    try {
-                        pedidoService.criarPedido(request);
-                    } catch (RuntimeException e) {
-                        System.out.println(e.getMessage());
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("Erro ao ler o arquivo XML: " + e.getMessage());
+            } else {
+                return ResponseEntity.badRequest().body("Arquivo vazio: " + arquivo.getOriginalFilename());
             }
-        } else {
-            System.out.println("Arquivo XML não encontrado em: " + xmlFilePath);
         }
+        return ResponseEntity.ok("Todos os arquivos XML foram processados com sucesso");
     }
 
     private List<PedidoRequest> parseXmlToPedidoRequests(String xml) {

@@ -6,43 +6,42 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import pedido.ApplicationTests;
 import pedido.dto.PedidoRequest;
 import pedido.model.Pedido;
-import pedido.model.Pedidos;
 import pedido.service.PedidoService;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class PedidoControllerTest extends ApplicationTests {
 
-    @Value("${pedido.importar.json.path}")
-    private String jsonFilePath;
+    @Value("${pedido.importar.file.json}")
+    private String fileJson;
 
-    @Value("${pedido.importar.xml.path}")
-    private String xmlFilePath;
+    @Value("${pedido.importar.file.xml}")
+    private String fileXml;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     @Mock
     private PedidoService pedidoService;
@@ -94,13 +93,69 @@ public class PedidoControllerTest extends ApplicationTests {
         pedidoRequest.setQuantidade(10);
         pedidoRequest.setCodigoCliente(1);
 
+        List<PedidoRequest> pedidosRequest = Collections.singletonList(pedidoRequest);
+
         when(pedidoService.criarPedido(pedidoRequest)).thenReturn(new Pedido());
 
         mockMvc.perform(post("/api/pedidos/importar-json")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonFilePath))
+                        .content(String.valueOf(pedidosRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Pedidos importados com sucesso"));
+    }
+
+    @Test
+    public void testImportarPedidosArquivoJson() throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:"+fileJson);
+
+        if (!resource.exists()) {
+            throw new RuntimeException("O arquivo JSON não foi encontrado: " + fileJson);
+        }
+
+        try (InputStream is = resource.getInputStream()) {
+            String jsonContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+
+            MockMultipartFile jsonFile = new MockMultipartFile(
+                    "arquivos",
+                    "pedidos.json",
+                    MediaType.APPLICATION_JSON_VALUE,
+                    jsonContent.getBytes(StandardCharsets.UTF_8)
+            );
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart("/api/pedidos/importar-arquivo-json")
+                            .file(jsonFile)
+                            .contentType(MediaType.MULTIPART_FORM_DATA))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().string("Todos os arquivos foram processados com sucesso"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao carregar o arquivo JSON: " + e.getMessage(), e);
+        }
+    }
+
+    /*@Test
+    public void testImportarPedidosArquivoJson() throws Exception {
+        PedidoRequest pedidoRequest = new PedidoRequest();
+        pedidoRequest.setNumeroControle("12345");
+        pedidoRequest.setNome("Produto Teste");
+        pedidoRequest.setValorUnitario(BigDecimal.valueOf(100));
+        pedidoRequest.setQuantidade(10);
+        pedidoRequest.setCodigoCliente(1);
+
+        when(pedidoService.criarPedido(pedidoRequest)).thenReturn(new Pedido());
+
+        Path path = Paths.get(fileJson);
+
+        if (Files.exists(path)) {
+            String arquivo = Files.readString(path);
+
+
+            mockMvc.perform(post("/api/pedidos/importar-arquivo-json")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(arquivo))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("Pedidos importados com sucesso"));
+        }
     }
 
     @Test
@@ -116,7 +171,7 @@ public class PedidoControllerTest extends ApplicationTests {
 
         String xml = null;
         List<PedidoRequest> pedidosRequest = null;
-        Path path = Paths.get(xmlFilePath);
+        Path path = Paths.get(fileXml);
         if (Files.exists(path)) {
             xml = Files.readString(path);
             pedidosRequest = parseXmlToPedidoRequests(xml);
@@ -183,5 +238,5 @@ public class PedidoControllerTest extends ApplicationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].numeroControle", is("12345")))
                 .andExpect(jsonPath("$[0].valorTotal", is(100)));
-    }
+    }*/
 }

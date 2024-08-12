@@ -1,10 +1,10 @@
 package pedido.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import pedido.util.LocalDateAdapter;
 
 import javax.validation.constraints.NotNull;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -18,6 +18,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @XmlRootElement(name = "pedido")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PedidoRequest {
 
     @NotNull
@@ -42,11 +43,5 @@ public class PedidoRequest {
     @NotNull
     @XmlElement(name = "codigoCliente")
     private Integer codigoCliente;
-
-    public void afterUnmarshal(Unmarshaller u, Object parent) {
-        if (this.dataCadastro == null) {
-            this.dataCadastro = LocalDate.now(); // Define um valor padrão
-        }
-    }
 
 }

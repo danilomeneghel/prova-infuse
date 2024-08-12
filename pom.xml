@@ -66,6 +66,13 @@
             <artifactId>validation-api</artifactId>
         </dependency>
 
+        <!-- ModelMapper -->
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
         <!-- JUnit 5 and Mockito -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
