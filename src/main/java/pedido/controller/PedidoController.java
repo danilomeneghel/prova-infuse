@@ -1,8 +1,7 @@
 package pedido.controller;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.multipart.MultipartFile;
 import pedido.model.Pedido;
@@ -10,12 +9,10 @@ import pedido.dto.PedidoRequest;
 import pedido.model.Pedidos;
 import pedido.service.PedidoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -30,6 +27,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/pedidos")
+@Tag( name = "Pedidos", description = "Cadastro de Pedidos" )
 public class PedidoController {
 
     private final PedidoService pedidoService;
