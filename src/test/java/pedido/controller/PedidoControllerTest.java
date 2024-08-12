@@ -95,13 +95,24 @@ public class PedidoControllerTest extends ApplicationTests {
 
         List<PedidoRequest> pedidosRequest = Collections.singletonList(pedidoRequest);
 
-        when(pedidoService.criarPedido(pedidoRequest)).thenReturn(new Pedido());
+        Pedido pedido = new Pedido();
+        pedido.setNumeroControle("12345");
+        pedido.setNome("Produto Teste");
+        pedido.setValorUnitario(BigDecimal.valueOf(100));
+        pedido.setQuantidade(10);
+        pedido.setCodigoCliente(1);
+
+        when(pedidoService.criarPedido(pedidoRequest)).thenReturn(pedido);
+
+        // Serializa a lista de pedidos como JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonPedidos = objectMapper.writeValueAsString(pedidosRequest);
 
         mockMvc.perform(post("/api/pedidos/importar-json")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(String.valueOf(pedidosRequest)))
+                        .content(jsonPedidos))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Pedidos importados com sucesso"));
+                .andExpect(content().string("Pedido(s) importado(s) com sucesso"));
     }
 
     @Test

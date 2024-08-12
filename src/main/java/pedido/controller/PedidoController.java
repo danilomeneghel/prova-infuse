@@ -70,8 +70,8 @@ public class PedidoController {
     }
 
     @PostMapping(path = "/importar-json", consumes = "application/json", produces = "application/json")
-    public void importarPedidosJson(@RequestBody List<PedidoRequest> pedidosRequest) {
-        importarPedidos(pedidosRequest);
+    public ResponseEntity<String> importarPedidosJson(@RequestBody List<PedidoRequest> pedidosRequest) {
+        return importarPedidos(pedidosRequest);
     }
 
     @PostMapping("/importar-arquivo-json")
@@ -103,9 +103,9 @@ public class PedidoController {
     }
 
     @PostMapping(path = "/importar-xml", consumes = "application/xml", produces = "application/json")
-    public void importarPedidosXml(@RequestBody String xml) {
+    public ResponseEntity<String> importarPedidosXml(@RequestBody String xml) {
         List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xml);
-        importarPedidos(pedidosRequest);
+        return importarPedidos(pedidosRequest);
     }
 
     @PostMapping("/importar-arquivo-xml")
