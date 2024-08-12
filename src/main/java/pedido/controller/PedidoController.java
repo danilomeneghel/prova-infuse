@@ -153,11 +153,6 @@ public class PedidoController {
             JAXBContext jaxbContext = JAXBContext.newInstance(Pedidos.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             Pedidos pedidos = (Pedidos) unmarshaller.unmarshal(new StringReader(xml));
-            for (PedidoRequest pedidoRequest : pedidos.getPedido()) {
-                if (pedidoRequest.getDataCadastro() == null) {
-                    pedidoRequest.setDataCadastro(LocalDate.now()); // Define uma data padrão
-                }
-            }
             return pedidos.getPedido();
         } catch (JAXBException e) {
             throw new RuntimeException("Erro ao processar XML", e);

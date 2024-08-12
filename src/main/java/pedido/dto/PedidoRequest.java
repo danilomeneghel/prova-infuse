@@ -1,7 +1,7 @@
 package pedido.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import pedido.util.LocalDateAdapter;
 
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.Unmarshaller;
@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -24,6 +25,7 @@ public class PedidoRequest {
     private String numeroControle;
 
     @XmlElement(name = "dataCadastro", required = false)
+    @XmlJavaTypeAdapter(LocalDateAdapter.class)
     private LocalDate dataCadastro;
 
     @NotNull
@@ -46,4 +48,5 @@ public class PedidoRequest {
             this.dataCadastro = LocalDate.now(); // Define um valor padrão
         }
     }
+
 }
