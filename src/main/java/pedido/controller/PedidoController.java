@@ -2,6 +2,7 @@ package pedido.controller;
 
 import pedido.model.Pedido;
 import pedido.dto.PedidoRequest;
+import pedido.model.Pedidos;
 import pedido.service.PedidoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -149,9 +150,15 @@ public class PedidoController {
 
     private List<PedidoRequest> parseXmlToPedidoRequests(String xml) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(PedidoRequest.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Pedidos.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            return List.of((PedidoRequest) unmarshaller.unmarshal(new StringReader(xml)));
+            Pedidos pedidos = (Pedidos) unmarshaller.unmarshal(new StringReader(xml));
+            for (PedidoRequest pedidoRequest : pedidos.getPedido()) {
+                if (pedidoRequest.getDataCadastro() == null) {
+                    pedidoRequest.setDataCadastro(LocalDate.now()); // Define uma data padrão
+                }
+            }
+            return pedidos.getPedido();
         } catch (JAXBException e) {
             throw new RuntimeException("Erro ao processar XML", e);
         }

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.math.BigDecimal;
@@ -13,14 +16,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @XmlRootElement(name = "pedido")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class PedidoRequest {
 
     @NotNull
     @XmlElement(name = "numeroControle")
     private String numeroControle;
 
-    @XmlElement(name = "dataCadastro")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @XmlElement(name = "dataCadastro", required = false)
     private LocalDate dataCadastro;
 
     @NotNull
@@ -38,4 +41,9 @@ public class PedidoRequest {
     @XmlElement(name = "codigoCliente")
     private Integer codigoCliente;
 
+    public void afterUnmarshal(Unmarshaller u, Object parent) {
+        if (this.dataCadastro == null) {
+            this.dataCadastro = LocalDate.now(); // Define um valor padrão
+        }
+    }
 }

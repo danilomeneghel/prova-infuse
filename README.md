@@ -32,6 +32,15 @@ $ git clone https://github.com/danilomeneghel/prova-infuse.git
 $ cd prova-infuse
 ```
 
+## MySql
+
+Abra seu MySql e crie 2 bases de dados:
+
+prova_infuse
+
+prova_infuse_test
+
+
 ## Maven
 
 Para carregar o projeto, digite no terminal:

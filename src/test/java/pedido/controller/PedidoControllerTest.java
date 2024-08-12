@@ -6,7 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import pedido.ApplicationTests;
@@ -14,7 +17,14 @@ import pedido.dto.PedidoRequest;
 import pedido.model.Pedido;
 import pedido.service.PedidoService;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.StringReader;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,6 +36,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class PedidoControllerTest extends ApplicationTests {
+
+    @Value("${pedido.importar.json.path}")
+    private String jsonFilePath;
+
+    @Value("${pedido.importar.xml.path}")
+    private String xmlFilePath;
 
     @Mock
     private PedidoService pedidoService;
@@ -81,9 +97,15 @@ public class PedidoControllerTest extends ApplicationTests {
 
         mockMvc.perform(post("/api/pedidos/importar-json")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(List.of(pedidoRequest))))
+                        .content(jsonFilePath))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Pedidos importados com sucesso"));
+    }
+
+    @Test
+    public void testDate() {
+        LocalDate date = LocalDate.now();
+        System.out.println("Data atual: " + date);
     }
 
     @Test
@@ -95,15 +117,37 @@ public class PedidoControllerTest extends ApplicationTests {
         pedidoRequest.setQuantidade(10);
         pedidoRequest.setCodigoCliente(1);
 
-        String xml = "<pedido><numeroControle>12345</numeroControle><nome>Produto Teste</nome><valorUnitario>100</valorUnitario><quantidade>10</quantidade><codigoCliente>1</codigoCliente></pedido>";
-
         when(pedidoService.criarPedido(pedidoRequest)).thenReturn(new Pedido());
 
-        mockMvc.perform(post("/api/pedidos/importar-xml")
-                        .contentType(MediaType.APPLICATION_XML)
-                        .content(xml))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Pedidos importados com sucesso"));
+        String xml = null;
+        List<PedidoRequest> pedidosRequest = null;
+        Path path = Paths.get(xmlFilePath);
+        if (Files.exists(path)) {
+            xml = Files.readString(path);
+            pedidosRequest = parseXmlToPedidoRequests(xml);
+        }
+
+        for (PedidoRequest request : pedidosRequest) {
+            try {
+                mockMvc.perform(post("/api/pedidos/importar-xml")
+                                .contentType(MediaType.APPLICATION_XML)
+                                .content(request.toString()))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string("Pedidos importados com sucesso"));
+            } catch (RuntimeException e) {
+                throw new RuntimeException("Erro ao importar XML", e);
+            }
+        }
+    }
+
+    private List<PedidoRequest> parseXmlToPedidoRequests(String xml) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(PedidoRequest.class);
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+            return List.of((PedidoRequest) unmarshaller.unmarshal(new StringReader(xml)));
+        } catch (JAXBException e) {
+            throw new RuntimeException("Erro ao processar XML", e);
+        }
     }
 
     @Test
