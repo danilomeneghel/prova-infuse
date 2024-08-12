@@ -103,12 +103,6 @@ public class PedidoControllerTest extends ApplicationTests {
     }
 
     @Test
-    public void testDate() {
-        LocalDate date = LocalDate.now();
-        System.out.println("Data atual: " + date);
-    }
-
-    @Test
     public void testImportarPedidosXml() throws Exception {
         PedidoRequest pedidoRequest = new PedidoRequest();
         pedidoRequest.setNumeroControle("12345");

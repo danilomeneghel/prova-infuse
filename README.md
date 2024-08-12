@@ -12,7 +12,8 @@ Avaliação técnica de uma API de Cadastro de Pedido, desenvolvido em Java com 
 ## Requisitos
 
 - Java JDK 17
-- Apache Maven >= 3.6.3 (Opcional)
+- Apache Maven >= 3.9.8
+- MySql 8
 
 ## Tecnologias
 
