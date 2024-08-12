@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import pedido.ApplicationTests;
 import pedido.dto.PedidoRequest;
 import pedido.model.Pedido;
+import pedido.model.Pedidos;
 import pedido.service.PedidoService;
 
 import javax.xml.bind.JAXBContext;
@@ -136,9 +137,10 @@ public class PedidoControllerTest extends ApplicationTests {
 
     private List<PedidoRequest> parseXmlToPedidoRequests(String xml) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(PedidoRequest.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Pedidos.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            return List.of((PedidoRequest) unmarshaller.unmarshal(new StringReader(xml)));
+            Pedidos pedidos = (Pedidos) unmarshaller.unmarshal(new StringReader(xml));
+            return pedidos.getPedido();
         } catch (JAXBException e) {
             throw new RuntimeException("Erro ao processar XML", e);
         }
