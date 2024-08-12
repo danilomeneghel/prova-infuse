@@ -51,10 +51,18 @@ $ ./mvnw spring-boot:run
 ```
 
 Aguarde carregar todo o serviço web. <br>
-Após concluído, digite o endereço abaixo em seu navegador, nele será listado os produtos 
+Após concluído, digite o endereço abaixo em seu navegador, nele será listado os pedidos 
 cadastrados na API. <br>
 
 http://localhost:8080/api/pedidos
+
+
+## Swagger
+
+Documentação da API RESTful:
+
+http://localhost:8080/swagger-ui.html
+
 
 ## Testes
 
