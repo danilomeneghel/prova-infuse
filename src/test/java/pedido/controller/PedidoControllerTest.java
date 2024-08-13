@@ -209,4 +209,5 @@ public class PedidoControllerTest extends ApplicationTests {
                         .param("dataCadastro", "2024-08-10"))
                 .andExpect(status().isOk());
     }
+
 }

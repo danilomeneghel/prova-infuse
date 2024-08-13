@@ -3,6 +3,7 @@ package pedido.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 import pedido.model.Pedido;
 import pedido.dto.PedidoRequest;
@@ -140,8 +141,9 @@ public class PedidoController {
     @GetMapping
     public ResponseEntity<List<Pedido>> consultarPedidos(
             @RequestParam(required = false) String numeroControle,
-            @RequestParam(required = false) LocalDate dataCadastro) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataCadastro) {
         List<Pedido> pedidos = pedidoService.consultarPedidos(numeroControle, dataCadastro);
         return new ResponseEntity<>(pedidos, HttpStatus.OK);
     }
+
 }
