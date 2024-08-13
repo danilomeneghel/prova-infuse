@@ -1,10 +1,9 @@
 # Prova Infuse
 
-Avaliação técnica de uma API de Cadastro de Pedido, desenvolvido em Java com Spring-Boot.
+Avaliação técnica de uma API de Cadastro de Pedidos, desenvolvido em Java com Spring-Boot.
 
 ## Características
 
-- CRUD
 - API RESTful
 - Validation
 - MockMVC
@@ -22,6 +21,8 @@ Avaliação técnica de uma API de Cadastro de Pedido, desenvolvido em Java com 
 - Maven
 - Spring
 - Lombok
+- XML
+- JSON
 - MySql
 - JUnit
 
@@ -51,11 +52,58 @@ $ mvn spring-boot:run
 ```
 
 Aguarde carregar todo o serviço web. <br>
-Após concluído, digite o endereço abaixo em seu navegador, nele será listado os pedidos 
+Após concluído, digite o endereço abaixo em seu navegador, nele será listado os pedidos
 cadastrados na API. <br>
 
 http://localhost:8080/api/pedidos
 
+## Importação de Arquivos
+
+Exemplo da estrutura dos dados para importação de arquivos:
+
+- XML
+
+```
+<pedidos>
+    <pedido>
+        <numeroControle>12345</numeroControle>
+        <dataCadastro>2024-08-10</dataCadastro>
+        <nome>Produto A</nome>
+        <valorUnitario>100.00</valorUnitario>
+        <quantidade>10</quantidade>
+        <codigoCliente>1</codigoCliente>
+    </pedido>
+    <pedido>
+        <numeroControle>12346</numeroControle>
+        <nome>Produto B</nome>
+        <valorUnitario>50.00</valorUnitario>
+        <quantidade>3</quantidade>
+        <codigoCliente>2</codigoCliente>
+    </pedido>
+</pedidos>
+```
+
+- JSON
+
+```
+[
+    {
+        "numeroControle": "12345",
+        "dataCadastro": "2024-08-10",
+        "nome": "Produto A",
+        "valorUnitario": 100.00,
+        "quantidade": 10,
+        "codigoCliente": 1
+    },
+    {
+        "numeroControle": "12346",
+        "nome": "Produto B",
+        "valorUnitario": 50.00,
+        "quantidade": 3,
+        "codigoCliente": 2
+    }
+]
+```
 
 ## Swagger
 
