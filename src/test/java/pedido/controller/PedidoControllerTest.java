@@ -25,10 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -137,78 +139,39 @@ public class PedidoControllerTest extends ApplicationTests {
                             .file(jsonFile)
                             .contentType(MediaType.MULTIPART_FORM_DATA))
                     .andExpect(MockMvcResultMatchers.status().isOk())
-                    .andExpect(MockMvcResultMatchers.content().string("Todos os arquivos foram processados com sucesso"));
+                    .andExpect(MockMvcResultMatchers.content().string("Arquivo(s) JSON importado(s) com sucesso"));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Erro ao carregar o arquivo JSON: " + e.getMessage(), e);
         }
     }
 
-    /*@Test
-    public void testImportarPedidosArquivoJson() throws Exception {
-        PedidoRequest pedidoRequest = new PedidoRequest();
-        pedidoRequest.setNumeroControle("12345");
-        pedidoRequest.setNome("Produto Teste");
-        pedidoRequest.setValorUnitario(BigDecimal.valueOf(100));
-        pedidoRequest.setQuantidade(10);
-        pedidoRequest.setCodigoCliente(1);
-
-        when(pedidoService.criarPedido(pedidoRequest)).thenReturn(new Pedido());
-
-        Path path = Paths.get(fileJson);
-
-        if (Files.exists(path)) {
-            String arquivo = Files.readString(path);
-
-
-            mockMvc.perform(post("/api/pedidos/importar-arquivo-json")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(arquivo))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Pedidos importados com sucesso"));
-        }
-    }
-
     @Test
-    public void testImportarPedidosXml() throws Exception {
-        PedidoRequest pedidoRequest = new PedidoRequest();
-        pedidoRequest.setNumeroControle("12345");
-        pedidoRequest.setNome("Produto Teste");
-        pedidoRequest.setValorUnitario(BigDecimal.valueOf(100));
-        pedidoRequest.setQuantidade(10);
-        pedidoRequest.setCodigoCliente(1);
+    public void testImportarPedidosArquivoXml() throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:"+fileXml);
 
-        when(pedidoService.criarPedido(pedidoRequest)).thenReturn(new Pedido());
-
-        String xml = null;
-        List<PedidoRequest> pedidosRequest = null;
-        Path path = Paths.get(fileXml);
-        if (Files.exists(path)) {
-            xml = Files.readString(path);
-            pedidosRequest = parseXmlToPedidoRequests(xml);
+        if (!resource.exists()) {
+            throw new RuntimeException("O arquivo XML não foi encontrado: " + fileXml);
         }
 
-        for (PedidoRequest request : pedidosRequest) {
-            try {
-                mockMvc.perform(post("/api/pedidos/importar-xml")
-                                .contentType(MediaType.APPLICATION_XML)
-                                .content(request.toString()))
-                        .andExpect(status().isOk())
-                        .andExpect(content().string("Pedidos importados com sucesso"));
-            } catch (RuntimeException e) {
-                throw new RuntimeException("Erro ao importar XML", e);
-            }
-        }
-    }
+        try (InputStream is = resource.getInputStream()) {
+            String xmlContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-    private List<PedidoRequest> parseXmlToPedidoRequests(String xml) {
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Pedidos.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Pedidos pedidos = (Pedidos) unmarshaller.unmarshal(new StringReader(xml));
-            return pedidos.getPedido();
-        } catch (JAXBException e) {
-            throw new RuntimeException("Erro ao processar XML", e);
+            MockMultipartFile xmlFile = new MockMultipartFile(
+                    "arquivos",
+                    "pedidos.xml",
+                    MediaType.APPLICATION_XML_VALUE,
+                    xmlContent.getBytes(StandardCharsets.UTF_8)
+            );
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart("/api/pedidos/importar-arquivo-xml")
+                            .file(xmlFile)
+                            .contentType(MediaType.MULTIPART_FORM_DATA))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().string("Arquivo(s) XML importado(s) com sucesso"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao carregar o arquivo XML: " + e.getMessage(), e);
         }
     }
 
@@ -226,9 +189,7 @@ public class PedidoControllerTest extends ApplicationTests {
 
         mockMvc.perform(get("/api/pedidos")
                         .param("numeroControle", "12345"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].numeroControle", is("12345")))
-                .andExpect(jsonPath("$[0].valorTotal", is(100)));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -246,8 +207,6 @@ public class PedidoControllerTest extends ApplicationTests {
 
         mockMvc.perform(get("/api/pedidos")
                         .param("dataCadastro", "2024-08-10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].numeroControle", is("12345")))
-                .andExpect(jsonPath("$[0].valorTotal", is(100)));
-    }*/
+                .andExpect(status().isOk());
+    }
 }

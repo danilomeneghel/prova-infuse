@@ -97,7 +97,7 @@ public class PedidoController {
                 return ResponseEntity.badRequest().body("Arquivo vazio: " + arquivo.getOriginalFilename());
             }
         }
-        return ResponseEntity.ok("Todos os arquivos foram processados com sucesso");
+        return ResponseEntity.ok("Arquivo(s) JSON importado(s) com sucesso");
     }
 
     @PostMapping(path = "/importar-xml", consumes = "application/xml", produces = "application/json")
@@ -123,7 +123,7 @@ public class PedidoController {
                 return ResponseEntity.badRequest().body("Arquivo vazio: " + arquivo.getOriginalFilename());
             }
         }
-        return ResponseEntity.ok("Todos os arquivos XML foram processados com sucesso");
+        return ResponseEntity.ok("Arquivo(s) XML importado(s) com sucesso");
     }
 
     private List<PedidoRequest> parseXmlToPedidoRequests(String xml) {
