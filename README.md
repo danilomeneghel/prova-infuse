@@ -47,7 +47,7 @@ prova_infuse_test
 Para carregar o projeto, digite no terminal:
 
 ```
-$ ./mvnw spring-boot:run
+$ mvn spring-boot:run
 ```
 
 Aguarde carregar todo o serviço web. <br>
@@ -69,7 +69,7 @@ http://localhost:8080/swagger-ui.html
 Para realizar os testes, execute o seguinte comando no terminal:
 
 ```
-$ ./mvnw test
+$ mvn test
 ```
 
 ## Licença
