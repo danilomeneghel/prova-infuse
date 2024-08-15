@@ -1,8 +1,8 @@
 package pedido.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.modelmapper.ModelMapper;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 import pedido.model.Pedido;
@@ -14,14 +14,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayInputStream;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,12 +35,12 @@ import java.util.stream.Collectors;
 public class PedidoController {
 
     private final PedidoService pedidoService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    private ModelMapper modelMapper = new ModelMapper();
-    
     public PedidoController(PedidoService pedidoService) {
         this.pedidoService = pedidoService;
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
     }
 
     @PostMapping(consumes = {"application/json", "application/xml"}, produces = "application/json")
@@ -73,20 +76,23 @@ public class PedidoController {
         return importarPedidos(pedidosRequest);
     }
 
-    @PostMapping("/importar-arquivo-json")
+    @PostMapping(path = "/importar-arquivo-json", consumes = "multipart/form-data")
     public ResponseEntity<String> importarPedidosArquivoJson(@RequestParam("arquivos") MultipartFile[] arquivos) {
         for (MultipartFile arquivo : arquivos) {
             if (!arquivo.isEmpty()) {
                 try {
+                    // Lê o conteúdo do arquivo JSON como uma String
                     String jsonContent = new String(arquivo.getBytes(), StandardCharsets.UTF_8);
 
+                    // Converte o JSON para uma lista de mapas
                     List<Map<String, Object>> pedidosMapList = objectMapper.readValue(
                             jsonContent,
                             new TypeReference<List<Map<String, Object>>>() {}
                     );
 
+                    // Converte a lista de mapas para uma lista de PedidoRequest usando ObjectMapper
                     List<PedidoRequest> pedidosRequest = pedidosMapList.stream()
-                            .map(map -> modelMapper.map(map, PedidoRequest.class))
+                            .map(map -> objectMapper.convertValue(map, PedidoRequest.class))
                             .collect(Collectors.toList());
 
                     importarPedidos(pedidosRequest);
@@ -102,12 +108,12 @@ public class PedidoController {
     }
 
     @PostMapping(path = "/importar-xml", consumes = "application/xml", produces = "application/json")
-    public ResponseEntity<String> importarPedidosXml(@RequestBody String xml) {
-        List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xml);
+    public ResponseEntity<String> importarPedidosXml(@RequestBody String xmlString) throws JAXBException {
+        List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xmlString);
         return importarPedidos(pedidosRequest);
     }
 
-    @PostMapping("/importar-arquivo-xml")
+    @PostMapping(path = "/importar-arquivo-xml", consumes = "multipart/form-data")
     public ResponseEntity<String> importarPedidosArquivoXml(@RequestParam("arquivos") MultipartFile[] arquivos) {
         for (MultipartFile arquivo : arquivos) {
             if (!arquivo.isEmpty()) {
@@ -127,14 +133,29 @@ public class PedidoController {
         return ResponseEntity.ok("Arquivo(s) XML importado(s) com sucesso");
     }
 
-    private List<PedidoRequest> parseXmlToPedidoRequests(String xml) {
+    public List<PedidoRequest> parseXmlToPedidoRequests(String xmlString) {
         try {
+            // Converte a String XML para InputStream
+            InputStream xmlInputStream = new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8));
+
+            // Cria o contexto JAXB e o unmarshaller
             JAXBContext jaxbContext = JAXBContext.newInstance(Pedidos.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            Pedidos pedidos = (Pedidos) unmarshaller.unmarshal(new StringReader(xml));
-            return pedidos.getPedido();
+
+            // Deserializa o XML
+            Pedidos pedidos = (Pedidos) unmarshaller.unmarshal(xmlInputStream);
+
+            // Verifica se a lista de pedidos é nula, e se for, inicialize-a como uma lista vazia
+            List<PedidoRequest> pedidoRequests = pedidos.getPedido();
+            if (pedidoRequests == null) {
+                pedidoRequests = Collections.emptyList();
+            }
+
+            return pedidoRequests;
         } catch (JAXBException e) {
-            throw new RuntimeException("Erro ao processar XML", e);
+            // Trate a exceção de acordo com sua necessidade
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao deserializar XML", e);
         }
     }
 

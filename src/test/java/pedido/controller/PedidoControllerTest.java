@@ -1,6 +1,7 @@
 package pedido.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,8 +20,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import pedido.ApplicationTests;
 import pedido.dto.PedidoRequest;
 import pedido.model.Pedido;
+import pedido.model.Pedidos;
 import pedido.service.PedidoService;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -144,6 +150,49 @@ public class PedidoControllerTest extends ApplicationTests {
             e.printStackTrace();
             throw new RuntimeException("Erro ao carregar o arquivo JSON: " + e.getMessage(), e);
         }
+    }
+
+    @Test
+    public void testImportarPedidosXml() throws Exception {
+        PedidoRequest pedidoRequest = new PedidoRequest();
+        pedidoRequest.setNumeroControle("54321");
+        pedidoRequest.setNome("Produto Teste2");
+        pedidoRequest.setValorUnitario(BigDecimal.valueOf(100));
+        pedidoRequest.setQuantidade(10);
+        pedidoRequest.setCodigoCliente(1);
+
+        List<PedidoRequest> pedidosRequest = Collections.singletonList(pedidoRequest);
+
+        Pedido pedido = new Pedido();
+        pedido.setNumeroControle("54321");
+        pedido.setNome("Produto Teste2");
+        pedido.setValorUnitario(BigDecimal.valueOf(100));
+        pedido.setQuantidade(10);
+        pedido.setCodigoCliente(1);
+
+        when(pedidoService.criarPedido(pedidoRequest)).thenReturn(pedido);
+
+        Pedidos pedidosContainer = new Pedidos();
+        pedidosContainer.setPedido(pedidosRequest);
+
+        // Serializa o objeto Pedidos para XML
+        String xmlPedidos;
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(Pedidos.class);
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            marshaller.marshal(pedidosContainer, baos);
+            xmlPedidos = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        } catch (JAXBException e) {
+            throw new RuntimeException("Erro ao gerar XML", e);
+        }
+
+        mockMvc.perform(post("/api/pedidos/importar-xml")
+                        .contentType(MediaType.APPLICATION_XML)
+                        .content(xmlPedidos))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Pedido(s) importado(s) com sucesso"));
     }
 
     @Test
