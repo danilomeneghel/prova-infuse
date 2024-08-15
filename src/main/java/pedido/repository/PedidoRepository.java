@@ -1,7 +1,7 @@
 package pedido.repository;
 
-import pedido.model.Pedido;
 import org.springframework.data.jpa.repository.JpaRepository;
+import pedido.model.Pedido;
 
 import java.time.LocalDate;
 import java.util.List;

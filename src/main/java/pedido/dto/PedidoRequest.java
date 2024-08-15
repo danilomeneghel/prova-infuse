@@ -1,7 +1,9 @@
 package pedido.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import pedido.util.LocalDateAdapter;
 
 import javax.validation.constraints.NotNull;

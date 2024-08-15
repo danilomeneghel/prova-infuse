@@ -1,15 +1,15 @@
 package pedido.service;
 
-import pedido.ApplicationTests;
-import pedido.model.Pedido;
-import pedido.dto.PedidoRequest;
-import pedido.repository.PedidoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
+import pedido.ApplicationTests;
+import pedido.dto.PedidoRequest;
+import pedido.model.Pedido;
+import pedido.repository.PedidoRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

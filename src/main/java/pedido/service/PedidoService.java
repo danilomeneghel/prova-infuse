@@ -1,10 +1,10 @@
 package pedido.service;
 
-import pedido.model.Pedido;
-import pedido.dto.PedidoRequest;
-import pedido.repository.PedidoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pedido.dto.PedidoRequest;
+import pedido.model.Pedido;
+import pedido.repository.PedidoRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

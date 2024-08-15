@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>pedido</groupId>
-    <artifactId>pedido</artifactId>
+    <artifactId>prova-infuse</artifactId>
     <version>2.1</version>
     <packaging>jar</packaging>
 
-    <name>pedido</name>
+    <name>prova-infuse</name>
     <description>API de Gerenciamento de Pedidos</description>
 
     <parent>

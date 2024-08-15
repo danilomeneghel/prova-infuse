@@ -1,0 +1,33 @@
+version: '3'
+services:
+  api:
+    container_name: prova-infuse
+    build: .
+    command: mvn clean spring-boot:run -Dspring-boot.run.profiles=docker
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../:/spring-boot-api
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/prova_infuse
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+
+  mysql:
+    container_name: mysql
+    image: mysql:8
+    hostname: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: prova_infuse
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

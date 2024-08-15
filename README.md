@@ -13,6 +13,7 @@ Avaliação técnica de uma API de Cadastro de Pedidos, desenvolvido em Java com
 - Java JDK 17
 - Apache Maven >= 3.9.8
 - MySql 8
+- Docker (Opcional)
 
 ## Tecnologias
 
@@ -25,6 +26,7 @@ Avaliação técnica de uma API de Cadastro de Pedidos, desenvolvido em Java com
 - JSON
 - MySql
 - JUnit
+- Docker
 
 ## Instalação
 
@@ -48,7 +50,7 @@ prova_infuse_test
 Para carregar o projeto, digite no terminal:
 
 ```
-$ mvn spring-boot:run
+$ mvn clean spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 Aguarde carregar todo o serviço web. <br>
@@ -56,6 +58,32 @@ Após concluído, digite o endereço abaixo em seu navegador, nele será listado
 cadastrados na API. <br>
 
 http://localhost:8080/api/pedidos
+
+
+## Docker (Opcional)
+
+Para rodar o projeto via Docker, bastar executar o seguinte comando:
+
+```
+$ docker build -t projeto .
+$ docker run -p 8080:8080 -d projeto
+```
+
+Ou via Docker-Compose:
+
+```
+$ docker-compose up
+```
+
+Aguarde baixar as dependências e carregar todo o projeto, esse processo é demorado. <br>
+Caso conclua e não rode pela primeira vez, tente novamente executando o mesmo comando. <br>
+
+Para encerrar tudo digite:
+
+```
+$ docker-compose down
+```
+
 
 ## Importação de Arquivos
 
