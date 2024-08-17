@@ -1,0 +1,155 @@
+{
+	"info": {
+		"_postman_id": "5f54a730-f0b0-4948-a3fa-875922bcfcc1",
+		"name": "Infuse",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "importar-json",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n  {\n    \"numeroControle\": \"12345\",\n    \"dataCadastro\": \"2024-08-10\",\n    \"nome\": \"Produto A\",\n    \"valorUnitario\": 100.00,\n    \"quantidade\": 10,\n    \"codigoCliente\": 1\n  },\n  {\n    \"numeroControle\": \"12346\",\n    \"nome\": \"Produto B\",\n    \"valorUnitario\": 50.00,\n    \"quantidade\": 3,\n    \"codigoCliente\": 2\n  }\n]\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/pedidos/importar-json",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"pedidos",
+						"importar-json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "importar-xml",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "<pedidos>\n    <pedido>\n        <numeroControle>12345</numeroControle>\n        <dataCadastro>2024-08-10</dataCadastro>\n        <nome>Produto A</nome>\n        <valorUnitario>100.00</valorUnitario>\n        <quantidade>10</quantidade>\n        <codigoCliente>1</codigoCliente>\n    </pedido>\n    <pedido>\n        <numeroControle>12346</numeroControle>\n        <nome>Produto B</nome>\n        <valorUnitario>50.00</valorUnitario>\n        <quantidade>3</quantidade>\n        <codigoCliente>2</codigoCliente>\n    </pedido>\n</pedidos>\n",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/pedidos/importar-xml",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"pedidos",
+						"importar-xml"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "importar-arquivo-json",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "arquivos",
+							"type": "file",
+							"src": "/home/danilo/Documentos/prova-infuse/src/test/resources/pedidos.json"
+						}
+					],
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/pedidos/importar-arquivo-json",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"pedidos",
+						"importar-arquivo-json"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "importar-arquivo-xml",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "arquivos",
+							"type": "file",
+							"src": "/home/danilo/Documentos/prova-infuse/src/test/resources/pedidos.xml"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:8080/api/pedidos/importar-arquivo-xml",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"pedidos",
+						"importar-arquivo-xml"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "api/pedidos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/pedidos/",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"pedidos",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

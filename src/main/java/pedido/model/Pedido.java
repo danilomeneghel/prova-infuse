@@ -27,7 +27,7 @@ public class Pedido {
 
     private BigDecimal valorUnitario;
 
-    private Integer quantidade;
+    private Integer quantidade = 1;
 
     private Integer codigoCliente;
 
