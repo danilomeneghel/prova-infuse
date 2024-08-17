@@ -1,13 +1,18 @@
 package pedido.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
@@ -15,16 +20,13 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import pedido.Application;
 import pedido.ApplicationTests;
 import pedido.dto.PedidoRequest;
 import pedido.model.Pedido;
 import pedido.model.Pedidos;
 import pedido.service.PedidoService;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +42,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(PedidoController.class)
+@ExtendWith(MockitoExtension.class)
 public class PedidoControllerTest extends ApplicationTests {
 
     @Value("${pedido.importar.file.json}")
@@ -49,21 +53,18 @@ public class PedidoControllerTest extends ApplicationTests {
     private String fileXml;
 
     @Autowired
-    private ResourceLoader resourceLoader;
+    private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private PedidoService pedidoService;
 
-    @InjectMocks
-    private PedidoController pedidoController;
+    @Autowired
+    private ResourceLoader resourceLoader;
 
-    private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        this.mockMvc = MockMvcBuilders.standaloneSetup(pedidoController).build();
         this.objectMapper = new ObjectMapper();
     }
 
@@ -113,7 +114,6 @@ public class PedidoControllerTest extends ApplicationTests {
         when(pedidoService.criarPedido(pedidoRequest)).thenReturn(pedido);
 
         // Serializa a lista de pedidos como JSON
-        ObjectMapper objectMapper = new ObjectMapper();
         String jsonPedidos = objectMapper.writeValueAsString(pedidosRequest);
 
         mockMvc.perform(post("/api/pedidos/importar-json")
@@ -125,7 +125,7 @@ public class PedidoControllerTest extends ApplicationTests {
 
     @Test
     public void testImportarPedidosArquivoJson() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:"+fileJson);
+        Resource resource = resourceLoader.getResource("classpath:" + fileJson);
 
         if (!resource.exists()) {
             throw new RuntimeException("O arquivo JSON não foi encontrado: " + fileJson);
@@ -197,7 +197,7 @@ public class PedidoControllerTest extends ApplicationTests {
 
     @Test
     public void testImportarPedidosArquivoXml() throws Exception {
-        Resource resource = resourceLoader.getResource("classpath:"+fileXml);
+        Resource resource = resourceLoader.getResource("classpath:" + fileXml);
 
         if (!resource.exists()) {
             throw new RuntimeException("O arquivo XML não foi encontrado: " + fileXml);
@@ -250,13 +250,12 @@ public class PedidoControllerTest extends ApplicationTests {
         pedido.setQuantidade(1);
         pedido.setCodigoCliente(1);
         pedido.setValorTotal(BigDecimal.valueOf(100));
-        pedido.setDataCadastro(LocalDate.of(2024, 8, 10));
+        pedido.setDataCadastro(LocalDate.now());
 
-        when(pedidoService.consultarPedidos(null, LocalDate.of(2024, 8, 10))).thenReturn(List.of(pedido));
+        when(pedidoService.consultarPedidos(null, LocalDate.now())).thenReturn(List.of(pedido));
 
         mockMvc.perform(get("/api/pedidos")
-                        .param("dataCadastro", "2024-08-10"))
+                        .param("dataCadastro", LocalDate.now().toString()))
                 .andExpect(status().isOk());
     }
-
 }

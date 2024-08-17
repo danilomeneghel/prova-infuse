@@ -1,7 +1,7 @@
 version: '3'
 services:
   mysql:
-    container_name: mysql
+    container_name: mysql_infuse
     image: mysql:8.4.2
     hostname: mysql
     restart: always
@@ -16,7 +16,7 @@ services:
       - app-network
 
   api:
-    container_name: api
+    container_name: api_infuse
     build: .
     command: mvn clean spring-boot:run -Dspring-boot.run.profiles=docker
     ports:
