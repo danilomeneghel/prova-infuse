@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,18 +12,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pedido.dto.PedidoRequest;
 import pedido.model.Pedido;
-import pedido.model.Pedidos;
 import pedido.service.PedidoService;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import pedido.util.ParseXml;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -107,7 +103,7 @@ public class PedidoController {
 
     @PostMapping(path = "/importar-xml", consumes = "application/xml", produces = "application/json")
     public ResponseEntity<String> importarPedidosXml(@RequestBody String xmlString) throws JAXBException {
-        List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xmlString);
+        List<PedidoRequest> pedidosRequest = ParseXml.parseXmlToPedidoRequests(xmlString);
         return importarPedidos(pedidosRequest);
     }
 
@@ -116,8 +112,8 @@ public class PedidoController {
         for (MultipartFile arquivo : arquivos) {
             if (!arquivo.isEmpty()) {
                 try {
-                    String xml = new String(arquivo.getBytes(), StandardCharsets.UTF_8);
-                    List<PedidoRequest> pedidosRequest = parseXmlToPedidoRequests(xml);
+                    String xmlString = new String(arquivo.getBytes(), StandardCharsets.UTF_8);
+                    List<PedidoRequest> pedidosRequest = ParseXml.parseXmlToPedidoRequests(xmlString);
 
                     importarPedidos(pedidosRequest);
                 } catch (IOException e) {
@@ -129,32 +125,6 @@ public class PedidoController {
             }
         }
         return ResponseEntity.ok("Arquivo(s) XML importado(s) com sucesso");
-    }
-
-    public List<PedidoRequest> parseXmlToPedidoRequests(String xmlString) {
-        try {
-            // Converte a String XML para InputStream
-            InputStream xmlInputStream = new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8));
-
-            // Cria o contexto JAXB e o unmarshaller
-            JAXBContext jaxbContext = JAXBContext.newInstance(Pedidos.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-            // Deserializa o XML
-            Pedidos pedidos = (Pedidos) unmarshaller.unmarshal(xmlInputStream);
-
-            // Verifica se a lista de pedidos é nula, e se for, inicialize-a como uma lista vazia
-            List<PedidoRequest> pedidoRequests = pedidos.getPedido();
-            if (pedidoRequests == null) {
-                pedidoRequests = Collections.emptyList();
-            }
-
-            return pedidoRequests;
-        } catch (JAXBException e) {
-            // Trate a exceção de acordo com sua necessidade
-            e.printStackTrace();
-            throw new RuntimeException("Erro ao deserializar XML", e);
-        }
     }
 
     @GetMapping

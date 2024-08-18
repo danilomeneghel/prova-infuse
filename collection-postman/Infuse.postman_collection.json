@@ -137,15 +137,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8080/api/pedidos/",
+					"raw": "http://localhost:8080/api/pedidos",
+					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
 						"api",
-						"pedidos",
-						""
+						"pedidos"
 					]
 				}
 			},
