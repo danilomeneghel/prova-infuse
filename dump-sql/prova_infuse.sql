@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS Pedido(
     valorUnitario FLOAT NOT NULL,
     quantidade INTEGER NOT NULL DEFAULT 1,
     codigoCliente INTEGER NOT NULL,
+    valorTotal FLOAT NOT NULL,
 
     PRIMARY KEY (numeroControle)
 );
