@@ -3,7 +3,6 @@ package pedido.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.xml.bind.JAXBException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,6 @@ import pedido.util.ParseXml;
 
 @RestController
 @RequestMapping("/api/pedidos")
-@Tag( name = "Pedidos", description = "Cadastro de Pedidos" )
 public class PedidoController {
 
     private final PedidoService pedidoService;
