@@ -48,19 +48,21 @@ public class PedidoController {
     public ResponseEntity<String> importarPedidos(List<PedidoRequest> pedidosRequest) {
         if (pedidosRequest.size() > 10) {
             return new ResponseEntity<>("Número máximo de pedidos é 10", HttpStatus.BAD_REQUEST);
-        }
-
-        for (PedidoRequest pedidoRequest : pedidosRequest) {
-            try {
-                List<Pedido> pedidos = pedidoService.consultarPedidos(pedidoRequest.getNumeroControle(), null);
-                if (pedidos.isEmpty()) {
-                    pedidoService.criarPedido(pedidoRequest);
+        } else {
+            for (PedidoRequest pedidoRequest : pedidosRequest) {
+                try {
+                    List<Pedido> pedidos = pedidoService.consultarPedidos(pedidoRequest.getNumeroControle(), null);
+                    if (pedidos.isEmpty()) {
+                        pedidoService.criarPedido(pedidoRequest);
+                    } else {
+                        return new ResponseEntity<>("Pedido já importado", HttpStatus.BAD_REQUEST);
+                    }
+                } catch (RuntimeException e) {
+                    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
                 }
-            } catch (RuntimeException e) {
-                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
+            return new ResponseEntity<>("Pedido(s) importado(s) com sucesso", HttpStatus.OK);
         }
-        return new ResponseEntity<>("Pedido(s) importado(s) com sucesso", HttpStatus.OK);
     }
 
     @PostMapping(path = "/importar-json", consumes = "application/json", produces = "application/json")
@@ -70,6 +72,8 @@ public class PedidoController {
 
     @PostMapping(path = "/importar-arquivo-json", consumes = "multipart/form-data")
     public ResponseEntity<String> importarPedidosArquivoJson(@RequestParam("arquivos") MultipartFile[] arquivos) {
+        ResponseEntity<String> pedidosImportados = null;
+
         for (MultipartFile arquivo : arquivos) {
             if (!arquivo.isEmpty()) {
                 try {
@@ -87,7 +91,7 @@ public class PedidoController {
                             .map(map -> objectMapper.convertValue(map, PedidoRequest.class))
                             .collect(Collectors.toList());
 
-                    importarPedidos(pedidosRequest);
+                    pedidosImportados = importarPedidos(pedidosRequest);
                 } catch (IOException e) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body("Erro ao ler o arquivo JSON: " + e.getMessage());
@@ -96,7 +100,12 @@ public class PedidoController {
                 return ResponseEntity.badRequest().body("Arquivo vazio: " + arquivo.getOriginalFilename());
             }
         }
-        return ResponseEntity.ok("Arquivo(s) JSON importado(s) com sucesso");
+
+        if (pedidosImportados.getStatusCode() != HttpStatus.BAD_REQUEST) {
+            return ResponseEntity.ok("Arquivo(s) JSON importado(s) com sucesso");
+        } else {
+            return pedidosImportados;
+        }
     }
 
     @PostMapping(path = "/importar-xml", consumes = "application/xml", produces = "application/json")
@@ -107,13 +116,15 @@ public class PedidoController {
 
     @PostMapping(path = "/importar-arquivo-xml", consumes = "multipart/form-data")
     public ResponseEntity<String> importarPedidosArquivoXml(@RequestParam("arquivos") MultipartFile[] arquivos) {
+        ResponseEntity<String> pedidosImportados = null;
+
         for (MultipartFile arquivo : arquivos) {
             if (!arquivo.isEmpty()) {
                 try {
                     String xmlString = new String(arquivo.getBytes(), StandardCharsets.UTF_8);
                     List<PedidoRequest> pedidosRequest = ParseXml.parseXmlToPedidoRequests(xmlString);
 
-                    importarPedidos(pedidosRequest);
+                    pedidosImportados = importarPedidos(pedidosRequest);
                 } catch (IOException e) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .body("Erro ao ler o arquivo XML: " + e.getMessage());
@@ -122,7 +133,12 @@ public class PedidoController {
                 return ResponseEntity.badRequest().body("Arquivo vazio: " + arquivo.getOriginalFilename());
             }
         }
-        return ResponseEntity.ok("Arquivo(s) XML importado(s) com sucesso");
+
+        if (pedidosImportados.getStatusCode() != HttpStatus.BAD_REQUEST) {
+            return ResponseEntity.ok("Arquivo(s) XML importado(s) com sucesso");
+        } else {
+            return pedidosImportados;
+        }
     }
 
     @GetMapping

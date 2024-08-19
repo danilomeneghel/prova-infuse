@@ -19,9 +19,11 @@ Avaliação técnica de uma API de Cadastro de Pedidos, desenvolvido em Java com
 
 - Java
 - JPA
+- Hibernate
 - Maven
 - Spring
 - Lombok
+- Jakarta
 - XML
 - JSON
 - MySql
@@ -38,11 +40,9 @@ $ cd prova-infuse
 
 ## MySql
 
-Abra seu MySql e crie 2 bases de dados:
+Abra seu MySql e crie a base de dados:
 
 prova_infuse
-
-prova_infuse_test
 
 
 ## Maven
