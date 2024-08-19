@@ -1,15 +1,15 @@
-CREATE DATABASE IF NOT EXISTS PROVA_INFUSE;
-USE PROVA_INFUSE;
+CREATE DATABASE IF NOT EXISTS prova_infuse;
+USE prova_infuse;
 
-CREATE TABLE IF NOT EXISTS Pedido(
+CREATE TABLE IF NOT EXISTS pedido (
     id INTEGER NOT NULL AUTO_INCREMENT,
-	numeroControle VARCHAR(30) NOT NULL,
-    dataCadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	numero_controle VARCHAR(30) NOT NULL,
+    data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     nome VARCHAR(30) NOT NULL,
-    valorUnitario FLOAT NOT NULL,
+    valor_unitario FLOAT NOT NULL,
     quantidade INTEGER NOT NULL DEFAULT 1,
-    codigoCliente INTEGER NOT NULL,
-    valorTotal FLOAT NOT NULL,
+    codigo_cliente INTEGER NOT NULL,
+    valor_total FLOAT NOT NULL,
 
-    PRIMARY KEY (numeroControle)
+    PRIMARY KEY (id)
 );
